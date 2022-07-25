@@ -1,13 +1,9 @@
 package com.bootcamp.customer.service;
 
-import com.bootcamp.customer.excepcion.CustomerCreationException;
 import com.bootcamp.customer.model.document.Customer;
-import com.bootcamp.customer.model.document.TypeCustomer;
 import com.bootcamp.customer.model.repository.CustomerRepository;
 import com.bootcamp.customer.model.service.CustomerService;
 import lombok.extern.slf4j.Slf4j;
-
-import org.apache.logging.log4j.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -30,62 +26,30 @@ public class CustomerServiceImpl implements CustomerService {
     }
     @Override
     public Mono<Customer> save(Customer customer) {
-    	return this.customerRepository.findById(customer.getDocumentNumber())
-    			.hasElement()
-    			.flatMap(exist -> {
-    				if (exist) return Mono.error(new CustomerCreationException("Customer already exists IF"));
-    				return customerRepository.save(customer);
-    			})
-    			.doOnSuccess(c -> log.info("Created new customer with ID: {}", c.getDocumentNumber()))
-                .doOnError(ex -> log.error("Error creating new client ", ex));
-    }
-
-//    @Override
-//    public Mono<Customer> findById(String documentNumber) {
-//        return this.customerRepository.findById(documentNumber);
-//    }
-    
-    @Override
-    public Mono<Customer> findById(String documentNumber) {
-        return this.customerRepository.existsById(documentNumber)
-        		.flatMap(rta -> {
-        			if(rta) return this.customerRepository.findById(documentNumber);
-					return Mono.error(new CustomerCreationException("Customer Dont exists "));
-        		})
-        		.doOnSuccess(c -> log.info("Created new customer with ID: {}", c.getDocumentNumber()))
-                .doOnError(ex -> log.error("Error creating new client ", ex));
+        return this.customerRepository.save(customer);
     }
 
     @Override
-    public Mono<Boolean> existById(String documentNumber) {
-        return this.customerRepository.existsById(documentNumber);
+    public Mono<Customer> findById(String id) {
+        return this.customerRepository.findById(id)
+                .doOnError(ex-> log.error(NO_FOUND_MSG_WITH_ID, id, ex));
     }
 
     @Override
-    public Mono<Void> delete(String documentNumber) {
-        return this.customerRepository.findById(documentNumber)
+    public Mono<Boolean> existById(String id) {
+        return this.customerRepository.existsById(id);
+    }
+
+    @Override
+    public Mono<Void> delete(String id) {
+        return this.customerRepository.findById(id)
                 .flatMap(existingCustomer-> customerRepository.delete(existingCustomer));
     }
 
     @Override
-    public Mono<Customer> update(String documentNumber,Customer customer) {
-        return this.customerRepository.findById(documentNumber)
+    public Mono<Customer> update(String id,Customer customer) {
+        return this.customerRepository.findById(id)
                 .flatMap(existingCustomer-> customerRepository.save(customer));
     }
-    
-	@Override
-	public Flux<TypeCustomer> findAllTypeCustomer(TypeCustomer typeCustomer) {
-		return this.findAllTypeCustomer(typeCustomer);
-	}
-	
-	@Override
-	public Mono<TypeCustomer> findTypeCustomerById(String id) {
-		return this.findTypeCustomerById(id);
-	}
-	
-	@Override
-	public Mono<TypeCustomer> SaveTypeCustomer(TypeCustomer typeCustomer) {
-		return null;
-	}
 
 }
