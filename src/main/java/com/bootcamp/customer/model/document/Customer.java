@@ -1,14 +1,14 @@
 package com.bootcamp.customer.model.document;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.util.Date;
+import javax.validation.constraints.NotEmpty;
 
-import javax.validation.constraints.NotNull;
-
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
@@ -16,22 +16,23 @@ import javax.validation.constraints.NotNull;
 @Document(collection = "customers")
 public class Customer {
 
-    @Id
-    private String id;
+  @Indexed(unique = true)
+  @Id
+  @NotEmpty(message = "The Document Must Be Unique")
+  private String documentNumber;
 
-    @NotNull
-    private String firstName;
+  @NotEmpty(message = "The Type of Doc. Can be DNI|CE|PASSPORT")
+  private String documentType;
 
-    @NotNull
-    private String lastName;
+  @NotEmpty(message = "The FirstName is required")
+  private String firstName;
 
-    @NotNull
-    private String documentType;
+  @NotEmpty(message = "The LastName is required")
+  private String lastName;
 
-    @NotNull
-    private String documentId;
+  @DateTimeFormat(pattern = "yyyy-MM-dd")
+  private Date createAt;
 
-    @NotNull
-    private String type;
+  private TypeCustomer type;
 
 }
